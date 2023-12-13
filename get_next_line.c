@@ -6,17 +6,17 @@
 /*   By: soel-bou <soel-bou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/13 17:14:01 by soel-bou          #+#    #+#             */
-/*   Updated: 2023/12/13 17:14:03 by soel-bou         ###   ########.fr       */
+/*   Updated: 2023/12/13 22:10:26 by soel-bou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char *ft_strjoin(char *s1, char *s2)
+static char	*ft_strjoin(char *s1, char *s2)
 {
-	char *newstr;
-	int j;
-	int i;
+	char	*newstr;
+	int		j;
+	int		i;
 
 	if (s1 && s2)
 	{
@@ -38,19 +38,20 @@ char *ft_strjoin(char *s1, char *s2)
 	return (NULL);
 }
 
-char *readline(int fd, char *buffer, char *aftern)
+static char	*readline(int fd, char *buffer, char *aftern)
 {
-	char *tmp;
-	int rd;
+	char	*tmp;
+	int		rd;
 
 	rd = 1;
 	while (rd > 0)
 	{
 		rd = read(fd, buffer, (size_t)BUFFER_SIZE);
 		if (rd == -1)
-			return (free(buffer), buffer = NULL, free(aftern), aftern = NULL, NULL);
+			return (free(buffer), buffer = NULL, free(aftern),
+				aftern = NULL, NULL);
 		if (rd == 0)
-			break;
+			break ;
 		buffer[rd] = '\0';
 		if (!aftern)
 			aftern = ft_strdup("");
@@ -59,15 +60,15 @@ char *readline(int fd, char *buffer, char *aftern)
 		free(tmp);
 		tmp = NULL;
 		if (ft_strchr(buffer, '\n'))
-			break;
+			break ;
 	}
 	return (free(buffer), buffer = NULL, aftern);
 }
 
-char *set_aftern(char *line)
+static char	*set_aftern(char *line)
 {
-	char *aftern;
-	int i;
+	char	*aftern;
+	int		i;
 
 	i = 0;
 	while (line[i] && line[i] != '\n')
@@ -85,10 +86,11 @@ char *set_aftern(char *line)
 	free(line);
 	return (aftern);
 }
-char *gline(char *aftern)
+
+static char	*gline(char *aftern)
 {
-	int i;
-	char *line;
+	int		i;
+	char	*line;
 
 	i = 0;
 	while (aftern[i] != '\n' && aftern[i])
@@ -97,9 +99,9 @@ char *gline(char *aftern)
 		i++;
 	line = malloc(i + 1);
 	if (!line)
-		return (free(aftern), aftern = NULL, NULL);
+		return (aftern = NULL, NULL);
 	i = 0;
-	while (aftern[i]) // br\ner
+	while (aftern[i])
 	{
 		if (aftern[i] == '\n')
 		{
@@ -113,13 +115,15 @@ char *gline(char *aftern)
 	line[i] = '\0';
 	return (line);
 }
-char *get_next_line(int fd)
-{
-	char *buffer;
-	char *line;
-	static char *aftern;
 
-	if (fd < 0 || (size_t)BUFFER_SIZE <= 0 || read(fd, NULL, 0) == -1)
+char	*get_next_line(int fd)
+{
+	char		*buffer;
+	char		*line;
+	static char	*aftern;
+
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) == -1
+		|| BUFFER_SIZE > 2147483647)
 	{
 		free(aftern);
 		aftern = NULL;
@@ -130,21 +134,10 @@ char *get_next_line(int fd)
 		return (free(aftern), aftern = NULL, NULL);
 	aftern = readline(fd, buffer, aftern);
 	if (!aftern)
-		return (free(aftern), NULL);
+		return (NULL);
 	line = gline(aftern);
 	if (!line)
-		return (aftern = NULL, NULL);
+		return (free(aftern), aftern = NULL, NULL);
 	aftern = set_aftern(aftern);
 	return (line);
 }
-
-// int main()
-// {
-// 	int fd = open("test.txt", O_RDONLY);
-// 	printf("main %s", get_next_line(fd));
-// 	printf("main %s", get_next_line(fd));
-// 	// printf("main %s", get_next_line(fd));
-// 	// printf("main %s", get_next_line(fd));
-// 	// printf("main %s", get_next_line(fd));
-// 	// printf("main %s", get_next_line(fd));
-// }
